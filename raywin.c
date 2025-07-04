@@ -12,6 +12,7 @@ void InitRaywin() { glfwInit(); }
 
 ExWindow CreateExtraWindow(int width, int height, char *title) {
   ExWindow win = {0};
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   win.handle = glfwCreateWindow(width, height, title, NULL, GetWindowHandle());
 
   if (!win.handle) {
@@ -133,3 +134,60 @@ void SetExtraWindowSize(ExWindow *window, Vector2 size) {
   window->width = size.x;
   window->height = size.y;
 }
+
+void SetExtraWindowFlag(ExWindow *window, ExWindowFlag flag) {
+  if (!window->valid)
+    return;
+
+  window->flags |= flag;
+
+  switch (flag) {
+  case EXWIN_FLAG_FULLSCREEN: {
+    const GLFWvidmode *vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    glfwSetWindowMonitor(window->handle, glfwGetPrimaryMonitor(), 0, 0,
+                         window->width, window->height, 60);
+    break;
+  }
+  case EXWIN_FLAG_RESIZEABLE:
+    glfwSetWindowAttrib(window->handle, GLFW_RESIZABLE, GLFW_TRUE);
+    break;
+
+  case EXWIN_FLAG_UNDECORATED:
+    glfwSetWindowAttrib(window->handle, GLFW_DECORATED, GLFW_FALSE);
+    break;
+
+  case EXWIN_FLAG_TRANSPARENT:
+    glfwSetWindowAttrib(window->handle, GLFW_TRANSPARENT_FRAMEBUFFER,
+                        GLFW_TRUE);
+    break;
+
+  case EXWIN_FALG_ALWAYS_ON_TOP:
+    glfwSetWindowAttrib(window->handle, GLFW_FLOATING, GLFW_TRUE);
+    break;
+  }
+}
+
+int nextWindowFlags = 0;
+
+void ExWindowHint(ExWindowFlag flag) {
+  nextWindowFlags |= flag;
+
+  switch (flag) {
+  case EXWIN_FLAG_FULLSCREEN:
+    // Does not work for fullscreen
+    break;
+  case EXWIN_FLAG_RESIZEABLE:
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    break;
+  case EXWIN_FLAG_UNDECORATED:
+    glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+    break;
+  case EXWIN_FLAG_TRANSPARENT:
+    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+    break;
+  case EXWIN_FALG_ALWAYS_ON_TOP:
+    glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+  }
+}
+
+void ClearExtraWindowFlag(ExWindow *window) { window->flags = 0; }

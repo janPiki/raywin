@@ -43,6 +43,8 @@ Vector2 GetMousePositionOn(ExWindow *window);
 // Window editing
 void SetExtraWindowPosition(ExWindow *window, Vector2 pos);
 void SetExtraWindowSize(ExWindow *window, Vector2 size);
-void SetExtraWindowFlag(ExWindow *window,
-                        ExWindowFlag flag);  // Not yet implemented
-void ClearExtraWindowFlag(ExWindow *window); // Not yet implemented
+void SetExtraWindowFlag(ExWindow *window, ExWindowFlag flag);
+void ExWindowHint(
+    ExWindowFlag flag); // Call before creating a window
+                        // (more reliable than SetExtraWindowFlag())
+void ClearExtraWindowFlag(ExWindow *window);
