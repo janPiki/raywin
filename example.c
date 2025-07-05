@@ -18,9 +18,17 @@ int main() {
 
   Texture2D Logo = LoadTexture("RaylibLogoBadlyDrawn.png");
 
+  Rectangle r = {100, 100, 50, 50};
+
   while (!WindowShouldClose() && !ExtraWindowShouldClose(&win2) &&
          !ExtraWindowShouldClose(&win3)) {
     UpdateExtraWindows();
+    UpdateWindowInput(&win2);
+
+    if (IsKeyDownOn(&win2, KEY_SPACE)) {
+      r.y -= 25;
+    }
+    r.y += 1;
 
     win3Pos.x += win3Vel.x;
     if (win3Pos.x >= 1366 - 150 || win3Pos.x <= 0) {
@@ -44,17 +52,16 @@ int main() {
 
     BeginDrawing();
     ClearBackground(SKYBLUE);
+    EndDrawing();
 
     BeginDrawingOn(&win2);
     ClearBackground(LIME);
+    DrawRectangle(r.x, r.y, r.width, r.height, RED);
     EndDrawingOn(&win2);
 
     BeginDrawingOn(&win3);
     ClearBackground(win3Col);
     DrawTexture(Logo, 0, 0, WHITE);
-
-    EndDrawing();
-
     EndDrawingOn(&win3);
   }
   UnloadTexture(Logo);

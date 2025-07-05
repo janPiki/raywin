@@ -1,5 +1,5 @@
 # Raywin
-A library for creating multiple windows in raylib
+A library for creating multiple windows in raylib. (Raywin currently doesn't work. come back later)
 
 ## Dependency
 Raywin uses GLFW. You need to install GLFW and link it when compiling:  

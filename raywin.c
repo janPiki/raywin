@@ -64,16 +64,14 @@ void BeginDrawingOn(ExWindow *window) {
   rlSetMatrixProjection(MatrixOrtho(0, fbWidth, fbHeight, 0, 0, 1));
   rlSetMatrixModelview(MatrixIdentity());
 
-  // Removed to prevent lag
-  //  BeginDrawing();
+  BeginDrawing();
 }
 
 void EndDrawingOn(ExWindow *window) {
   if (!window->valid)
     return;
 
-  // Removed to prevent lag
-  //  EndDrawing();
+  EndDrawing();
 
   glfwSwapBuffers(window->handle);
   glfwMakeContextCurrent(GetWindowHandle());
