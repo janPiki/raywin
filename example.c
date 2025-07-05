@@ -52,7 +52,6 @@ int main() {
 
     BeginDrawing();
     ClearBackground(SKYBLUE);
-    EndDrawing();
 
     BeginDrawingOn(&win2);
     ClearBackground(LIME);
@@ -63,6 +62,8 @@ int main() {
     ClearBackground(win3Col);
     DrawTexture(Logo, 0, 0, WHITE);
     EndDrawingOn(&win3);
+
+    EndDrawing();
   }
   UnloadTexture(Logo);
 

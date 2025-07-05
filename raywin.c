@@ -63,15 +63,11 @@ void BeginDrawingOn(ExWindow *window) {
 
   rlSetMatrixProjection(MatrixOrtho(0, fbWidth, fbHeight, 0, 0, 1));
   rlSetMatrixModelview(MatrixIdentity());
-
-  BeginDrawing();
 }
 
 void EndDrawingOn(ExWindow *window) {
   if (!window->valid)
     return;
-
-  EndDrawing();
 
   glfwSwapBuffers(window->handle);
   glfwMakeContextCurrent(GetWindowHandle());
