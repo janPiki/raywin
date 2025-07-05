@@ -10,6 +10,8 @@
 // General window functions
 void InitRaywin() { glfwInit(); }
 
+int nextWindowFlags = 0;
+
 ExWindow CreateExtraWindow(int width, int height, char *title) {
   ExWindow win = {0};
   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -36,6 +38,8 @@ ExWindow CreateExtraWindow(int width, int height, char *title) {
   win.height = height;
   win.title = strdup(title);
   win.valid = true;
+  win.flags = nextWindowFlags;
+  win.firstMouseUpdate = true;
 
   glfwMakeContextCurrent(GetWindowHandle());
 
@@ -60,6 +64,7 @@ void BeginDrawingOn(ExWindow *window) {
   rlSetMatrixProjection(MatrixOrtho(0, fbWidth, fbHeight, 0, 0, 1));
   rlSetMatrixModelview(MatrixIdentity());
 
+  // Removed to prevent lag
   //  BeginDrawing();
 }
 
@@ -67,6 +72,7 @@ void EndDrawingOn(ExWindow *window) {
   if (!window->valid)
     return;
 
+  // Removed to prevent lag
   //  EndDrawing();
 
   glfwSwapBuffers(window->handle);
@@ -90,6 +96,8 @@ void CloseExtraWindow(ExWindow *window) {
   window->valid = false;
 }
 
+void DeinitRaywin() { glfwTerminate(); }
+
 // Input handling
 void UpdateWindowInput(ExWindow *window) {
   if (!window->valid)
@@ -99,6 +107,27 @@ void UpdateWindowInput(ExWindow *window) {
 
   for (int i = 0; i < KEY_AMOUNT; i++) {
     window->currentKeys[i] = (glfwGetKey(window->handle, i) == GLFW_PRESS);
+  }
+
+  memcpy(window->prevMouseButton, window->currentMouseButton,
+         sizeof(window->currentMouseButton));
+
+  for (int i = 0; i < GLFW_MOUSE_BUTTON_LAST; i++) {
+    window->currentMouseButton[i] =
+        (glfwGetMouseButton(window->handle, i) == GLFW_PRESS);
+  }
+
+  double x, y;
+  glfwGetCursorPos(window->handle, &x, &y);
+  Vector2 current = {x, y};
+
+  if (window->firstMouseUpdate) {
+    window->lastMouse = current;
+    window->mouseDelta = (Vector2){0, 0};
+    window->firstMouseUpdate = false;
+  } else {
+    window->mouseDelta = Vector2Subtract(current, window->lastMouse);
+    window->lastMouse = current;
   }
 }
 
@@ -110,12 +139,44 @@ bool IsKeyPressedOn(ExWindow *window, int key) {
   return window->valid && window->currentKeys[key] && !window->prevKeys[key];
 }
 
+bool IsKeyReleasedOn(ExWindow *window, int key) {
+  return window->valid && !window->currentKeys[key] && window->prevKeys[key];
+}
+
 Vector2 GetMousePositionOn(ExWindow *window) {
   if (!window->valid)
     return (Vector2){0};
   double x, y;
   glfwGetCursorPos(window->handle, &x, &y);
   return (Vector2){x, y};
+}
+
+bool IsMouseButtonDownOn(ExWindow *window, int button) {
+  return window->valid && window->currentMouseButton[button];
+}
+
+bool IsMouseButtonPressedOn(ExWindow *window, int button) {
+  return window->valid && window->currentMouseButton[button] &&
+         !window->prevMouseButton[button];
+}
+
+bool IsMouseButtonReleasedOn(ExWindow *window, int button) {
+  return window->valid && !window->currentMouseButton[button] &&
+         window->prevMouseButton[button];
+}
+
+Vector2 GetMouseDeltaOn(ExWindow *window) {
+  return window->valid ? window->mouseDelta : (Vector2){0};
+}
+
+void EnableCursorOn(ExWindow *window) {
+  if (window->valid)
+    glfwSetInputMode(window->handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
+void DisableCursorOn(ExWindow *window) {
+  if (window->valid)
+    glfwSetInputMode(window->handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 // Window editing
@@ -133,6 +194,10 @@ void SetExtraWindowSize(ExWindow *window, Vector2 size) {
   glfwSetWindowSize(window->handle, size.x, size.y);
   window->width = size.x;
   window->height = size.y;
+}
+
+void SetExtraWindowTitle(ExWindow *window, char *title) {
+  glfwSetWindowTitle(window->handle, title);
 }
 
 void SetExtraWindowFlag(ExWindow *window, ExWindowFlag flag) {
@@ -161,13 +226,11 @@ void SetExtraWindowFlag(ExWindow *window, ExWindowFlag flag) {
                         GLFW_TRUE);
     break;
 
-  case EXWIN_FALG_ALWAYS_ON_TOP:
+  case EXWIN_FLAG_ALWAYS_ON_TOP:
     glfwSetWindowAttrib(window->handle, GLFW_FLOATING, GLFW_TRUE);
     break;
   }
 }
-
-int nextWindowFlags = 0;
 
 void ExWindowHint(ExWindowFlag flag) {
   nextWindowFlags |= flag;
@@ -185,9 +248,55 @@ void ExWindowHint(ExWindowFlag flag) {
   case EXWIN_FLAG_TRANSPARENT:
     glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
     break;
-  case EXWIN_FALG_ALWAYS_ON_TOP:
+  case EXWIN_FLAG_ALWAYS_ON_TOP:
     glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
   }
 }
 
 void ClearExtraWindowFlag(ExWindow *window) { window->flags = 0; }
+
+void MaximizeExtraWindow(ExWindow *window) {
+  glfwMaximizeWindow(window->handle);
+}
+
+void MinimizeExtraWindow(ExWindow *window) {
+  glfwIconifyWindow(window->handle);
+}
+
+void RestoreExtraWindow(ExWindow *window) { glfwRestoreWindow(window->handle); }
+
+void SetExtraWindowOpacity(ExWindow *window, float opacity) {
+  glfwSetWindowOpacity(window->handle, opacity);
+}
+
+// Window info
+
+Vector2 GetExtraWindowPos(ExWindow *window) {
+  int x, y;
+  glfwGetWindowPos(window->handle, &x, &y);
+  return (Vector2){x, y};
+}
+
+Vector2 GetExtraWindowSize(ExWindow *window) {
+  int x, y;
+  glfwGetWindowSize(window->handle, &x, &y);
+  return (Vector2){x, y};
+}
+
+bool IsExtraWindowFocused(ExWindow *window) {
+  return glfwGetWindowAttrib(window->handle, GLFW_FOCUSED);
+}
+
+bool IsExtraWindowMinimized(ExWindow *window) {
+  return glfwGetWindowAttrib(window->handle, GLFW_ICONIFIED);
+}
+
+float GetExtraWindowOpacity(ExWindow *window) {
+  return glfwGetWindowOpacity(window->handle);
+}
+
+Vector2 GetExtraWindowScaleDPI(ExWindow *window) {
+  float x, y;
+  glfwGetWindowContentScale(window->handle, &x, &y);
+  return (Vector2){x, y};
+}

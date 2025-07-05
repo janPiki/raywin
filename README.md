@@ -42,7 +42,7 @@ while(!WindowShouldClose()) { // You can use ExtraWindowShouldClose() to check o
   EndDrawingOn(&win3);
 
   EndDrawing();
-} // Make sure to close all the windows
+} // Make sure to close all the windows then call DeinitRaywin()
 ```
 
 See the raywin.h file to see the list of functions
