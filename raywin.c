@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+// This was extremely painful to make
+// Now I know why this hasn't been done before
+
 // General window functions
 void InitRaywin() { glfwInit(); }
 
@@ -55,7 +58,10 @@ bool ExtraWindowShouldClose(ExWindow *window) {
 void BeginDrawingOn(ExWindow *window) {
   if (!window->valid)
     return;
+  
   glfwMakeContextCurrent(window->handle);
+  rlDrawRenderBatchActive();
+  
 
   int fbWidth, fbHeight;
   glfwGetFramebufferSize(window->handle, &fbWidth, &fbHeight);
@@ -63,11 +69,16 @@ void BeginDrawingOn(ExWindow *window) {
 
   rlSetMatrixProjection(MatrixOrtho(0, fbWidth, fbHeight, 0, 0, 1));
   rlSetMatrixModelview(MatrixIdentity());
+  
+  rlClearScreenBuffers();
 }
 
 void EndDrawingOn(ExWindow *window) {
   if (!window->valid)
     return;
+  glfwMakeContextCurrent(window->handle);
+  
+  rlDrawRenderBatchActive();
 
   glfwSwapBuffers(window->handle);
   glfwMakeContextCurrent(GetWindowHandle());

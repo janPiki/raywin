@@ -28,7 +28,6 @@ int main() {
     if (IsKeyDownOn(&win2, KEY_SPACE)) {
       r.y -= 25;
     }
-    r.y += 1;
 
     win3Pos.x += win3Vel.x;
     if (win3Pos.x >= 1366 - 150 || win3Pos.x <= 0) {
@@ -52,6 +51,8 @@ int main() {
 
     BeginDrawing();
     ClearBackground(SKYBLUE);
+    DrawRectangle(0, 0, 50, 50, DARKBLUE);
+    EndDrawing();
 
     BeginDrawingOn(&win2);
     ClearBackground(LIME);
@@ -62,8 +63,6 @@ int main() {
     ClearBackground(win3Col);
     DrawTexture(Logo, 0, 0, WHITE);
     EndDrawingOn(&win3);
-
-    EndDrawing();
   }
   UnloadTexture(Logo);
 
