@@ -31,6 +31,7 @@ while(!WindowShouldClose()) { // You can use ExtraWindowShouldClose() to check o
   // Draw as usual
   BeginDrawing();
   ClearBackground(SKYBLUE);
+  EndDrawing();
 
   // Draw for other windows
   BeginDrawingOn(&win2);
@@ -40,8 +41,6 @@ while(!WindowShouldClose()) { // You can use ExtraWindowShouldClose() to check o
   BeginDrawingOn(&win3);
   ClearBackground(ORANGE);
   EndDrawingOn(&win3);
-
-  EndDrawing();
 } // Make sure to close all the windows then call DeinitRaywin()
 ```
 
