@@ -30,12 +30,16 @@ typedef struct {
   Vector2 mouseDelta;
 
   ExWindowFlag flags;
+  
+  rlRenderBatch renderBatch;
+  Shader defaultShader;
 } ExWindow;
 
 // General window functions
 void InitRaywin();
 ExWindow CreateExtraWindow(int width, int height, char *title);
 void UpdateExtraWindows();
+void SetupExtraWindow(); // does not do what you think it does, but I couldn't find a better name
 void BeginDrawingOn(ExWindow *window);
 void EndDrawingOn(ExWindow *window);
 bool ExtraWindowShouldClose(ExWindow *window);

@@ -30,13 +30,21 @@ ExWindow CreateExtraWindow(int width, int height, char *title) {
   glfwMakeContextCurrent(win.handle);
   rlglInit(width, height);
   rlLoadExtensions((void *)glfwGetProcAddress);
-
+  
   glfwSwapInterval(0);
 
   int fbWidth, fbHeight;
   glfwGetFramebufferSize(win.handle, &fbWidth, &fbHeight);
   rlViewport(0, 0, fbWidth, fbHeight);
 
+  rlSetMatrixProjection(MatrixOrtho(0.0, (double)width, (double)height, 0.0, 0.0, 1.0));
+  rlSetMatrixModelview(MatrixIdentity());
+  Shader defaultShader = LoadShader(0, 0);
+  if (defaultShader.id > 0) rlSetShader(defaultShader.id, defaultShader.locs);
+  else {
+    TraceLog(LOG_WARNING, "Default shader failed to load");
+  }
+  
   win.width = width;
   win.height = height;
   win.title = strdup(title);
@@ -55,13 +63,25 @@ bool ExtraWindowShouldClose(ExWindow *window) {
   return glfwWindowShouldClose(window->handle);
 }
 
+static GLFWwindow *lastWindow = NULL;
+
+void SetupExtraWindow(){
+  glfwMakeContextCurrent(GetWindowHandle());
+  rlDrawRenderBatchActive();
+  glfwSwapBuffers(GetWindowHandle());
+}
+
 void BeginDrawingOn(ExWindow *window) {
   if (!window->valid)
     return;
   
-  glfwMakeContextCurrent(window->handle);
-  rlDrawRenderBatchActive();
+  if (lastWindow && lastWindow != window->handle){
+    glfwMakeContextCurrent(lastWindow);
+    rlDrawRenderBatchActive();
+    glfwSwapBuffers(lastWindow);
+  }
   
+  glfwMakeContextCurrent(window->handle);
 
   int fbWidth, fbHeight;
   glfwGetFramebufferSize(window->handle, &fbWidth, &fbHeight);
@@ -71,6 +91,8 @@ void BeginDrawingOn(ExWindow *window) {
   rlSetMatrixModelview(MatrixIdentity());
   
   rlClearScreenBuffers();
+  
+  lastWindow = window->handle;
 }
 
 void EndDrawingOn(ExWindow *window) {
